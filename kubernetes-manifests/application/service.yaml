@@ -1,0 +1,14 @@
+# /kubernetes-manifests/application/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: cloud-demo-app-service
+spec:
+  type: ClusterIP
+  selector:
+    app: cloud-demo-app
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+    protocol: TCP

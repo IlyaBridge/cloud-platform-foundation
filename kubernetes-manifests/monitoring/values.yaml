@@ -1,0 +1,19 @@
+# /kubernetes-manifests/monitoring/values.yaml
+grafana:
+  adminPassword: "admin"
+  service:
+    type: ClusterIP
+  ingress:
+    enabled: false
+
+prometheus:
+  service:
+    type: ClusterIP
+  ingress:
+    enabled: false
+
+alertmanager:
+  service:
+    type: ClusterIP
+  ingress:
+    enabled: false

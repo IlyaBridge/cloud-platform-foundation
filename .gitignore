@@ -1,0 +1,65 @@
+# Ключи доступа
+service_account_key_file.json
+*.key
+*.pem
+*.crt
+
+*.tfvars
+terraform.tfvars
+terraform.tfvars.json
+backend.conf
+common-vars.sh
+
+# terraform state файлы
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+terraform.plan
+
+# Локальные конфиги
+.terraform/
+.kube/
+.kube/config
+.cache/
+
+# Докер файлы
+.env
+.dockerignore
+
+# Локальные сис. файлы
+/etc/hosts
+.bash_history
+.ssh/
+.vscode/
+
+# Логи и временные файлы
+*.log
+*.tmp
+*.temp
+*.swp
+*.swo
+
+# Прочие сборочные и тестовые файлы
+build/
+dist/
+node_modules/
+__pycache__/
+
+# ======================
+# Спец файлы для проекта
+
+# Скрипты ( пока в работе!!! )
+scripts/deploy-*.sh
+scripts/destroy*.sh
+scripts/quick-access.sh
+scripts/setup-k8s-access.sh
+
+# Модули с конфигом
+terraform/infrastructure/backend.conf
+terraform/kubernetes/backend.conf
+terraform/registry/backend.conf
+terraform/backend/backend.conf
+
+generated/
+tmp/
+temp/

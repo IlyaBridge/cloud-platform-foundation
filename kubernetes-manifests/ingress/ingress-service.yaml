@@ -1,0 +1,26 @@
+# /kubernetes-manifests/ingress/ingress-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: ingress-nginx-controller-loadbalancer
+  namespace: nginx-system
+  annotations:
+    # Аннотация для автоматического создания балансировщика в Yandex Cloud
+    yandex.cloud/load-balancer-type: "external"
+    yandex.cloud/subnet-id: "auto" 
+spec:
+  type: LoadBalancer
+  selector:
+    app.kubernetes.io/name: nginx-ingress
+    app.kubernetes.io/component: controller
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+      protocol: TCP
+    - name: https
+      port: 443
+      targetPort: 443
+      protocol: TCP
+  # Можно - зафиксировать внешний IP
+  # loadBalancerIP: "158.160.162.205"

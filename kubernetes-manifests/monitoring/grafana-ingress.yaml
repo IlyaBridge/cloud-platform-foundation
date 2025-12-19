@@ -1,0 +1,21 @@
+# /kubernetes-manifests/monitoring/grafana-ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grafana-ingress
+  namespace: monitoring
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: grafana.diploma.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: kube-prometheus-stack-grafana
+            port:
+              number: 3000
