@@ -15,6 +15,7 @@ common-vars.sh
 *.tfstate.*
 .terraform.lock.hcl
 terraform.plan
+terraform.tfvars.base
 
 # Локальные конфиги
 .terraform/
@@ -63,3 +64,10 @@ terraform/backend/backend.conf
 generated/
 tmp/
 temp/
+
+# App-specific ignores
+app/node_modules/
+app/.env*
+app/*.log
+app/build/
+app/dist/
