@@ -1,5 +1,3 @@
-# /kubernetes-manifests/application/deployment.yaml
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -18,7 +16,7 @@ spec:
     spec:
       containers:
         - name: nginx
-          image: cr.yandex/crpqku51qarfara5o639/cloud-demo-app:1.0.0
+          image: cr.yandex/crppgkh7l5r4btm40dup/cloud-demo-app:1.0.0
           ports:
             - containerPort: 80
           resources:
@@ -40,3 +38,6 @@ spec:
               port: 80
             initialDelaySeconds: 15
             periodSeconds: 20
+
+# Коммент для теста Atlantis
+# test-atlantis
