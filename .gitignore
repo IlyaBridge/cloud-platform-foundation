@@ -54,12 +54,16 @@ scripts/deploy-*.sh
 scripts/destroy*.sh
 scripts/quick-access.sh
 scripts/setup-k8s-access.sh
+scripts/install-atlantis.sh
+
 
 # Модули с конфигом
 terraform/infrastructure/backend.conf
 terraform/kubernetes/backend.conf
 terraform/registry/backend.conf
 terraform/backend/backend.conf
+
+kubernetes-manifests/atlantis/atlantis-values.yaml
 
 generated/
 tmp/

@@ -1,0 +1,32 @@
+# cloud-platform-foundation/kubernetes-manifests/atlantis/service-nodeport.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: atlantis-nodeport
+  namespace: atlantis
+spec:
+  type: NodePort
+  selector:
+    app.kubernetes.io/name: atlantis
+  ports:
+    - name: http
+      port: 4141
+      targetPort: 4141
+      nodePort: 31414
+
+# ==========================================
+# env:
+#   - name: AWS_ACCESS_KEY_ID
+#     valueFrom:
+#       secretKeyRef:
+#         name: atlantis-s3
+#         key: access_key
+
+#   - name: AWS_SECRET_ACCESS_KEY
+#     valueFrom:
+#       secretKeyRef:
+#         name: atlantis-s3
+#         key: secret_key
+
+#   - name: AWS_REGION
+#     value: ru-central1

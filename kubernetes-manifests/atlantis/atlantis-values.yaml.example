@@ -1,0 +1,29 @@
+# cloud-platform-foundation/kubernetes-manifests/atlantis/atlantis-values.yaml
+orgAllowlist: github.com/IlyaBridge/*
+
+github:
+  user: IlyaBridge
+  token: "GITHUB_TOKEN_HERE"
+  secret: atlantis-webhook-secret-123
+
+repoConfig: |
+  repos:
+    - id: /.*/
+      workflow: terraform
+      allowed_overrides: [workflow]
+      apply_requirements: [approved]
+
+  workflows:
+    terraform:
+      plan:
+        steps:
+          - init:
+              extra_args:
+                - "-backend-config=backend.conf"
+          - plan
+      apply:
+        steps:
+          - apply
+
+service:
+  type: LoadBalancer
