@@ -1,0 +1,67 @@
+name: Build & Deploy App
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "app/**"
+      - "kubernetes-manifests/application/**"
+      - ".github/workflows/app-cicd.yml"
+
+jobs:
+  build-push-deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      YC_CLOUD_ID: ${{ secrets.YC_CLOUD_ID }}
+      YC_FOLDER_ID: ${{ secrets.YC_FOLDER_ID }}
+      YC_K8S_CLUSTER_ID: ${{ secrets.YC_K8S_CLUSTER_ID }}
+      REGISTRY_ID: ${{ secrets.YC_REGISTRY_ID }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install yc
+        run: |
+          curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
+          echo "$HOME/yandex-cloud/bin" >> $GITHUB_PATH
+
+      - name: Configure yc with SA key
+        shell: bash
+        run: |
+          echo '${{ secrets.YC_SA_JSON }}' > sa.json
+          yc config profile create github || true
+          yc config set service-account-key sa.json --profile github
+          yc config set cloud-id "$YC_CLOUD_ID" --profile github
+          yc config set folder-id "$YC_FOLDER_ID" --profile github
+
+      - name: Login to Yandex Container Registry
+        run: |
+          yc container registry configure-docker --profile github
+
+      - name: Build and Push image
+        run: |
+          TAG=${{ github.sha }}
+          IMAGE="cr.yandex/${REGISTRY_ID}/cloud-demo-app:${TAG}"
+          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+          docker build -t "$IMAGE" ./app
+          docker push "$IMAGE"
+
+      - name: Get kubeconfig
+        run: |
+          yc managed-kubernetes cluster get-credentials "$YC_K8S_CLUSTER_ID" \
+            --external \
+            --force \
+            --profile github
+
+      - name: Deploy to Kubernetes
+        run: |
+          # применяем манифесты (Service/Ingress/Deployment)
+          kubectl apply -f kubernetes-manifests/application/
+
+          # обновляем только image в deployment
+          kubectl -n default set image deployment/cloud-demo-app cloud-demo-app="$IMAGE"
+
+          # ждём rollout
+          kubectl -n default rollout status deployment/cloud-demo-app --timeout=180s

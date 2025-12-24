@@ -55,7 +55,7 @@ scripts/destroy*.sh
 scripts/quick-access.sh
 scripts/setup-k8s-access.sh
 scripts/install-atlantis.sh
-
+scripts/atlantis-values.yaml
 
 # Модули с конфигом
 terraform/infrastructure/backend.conf

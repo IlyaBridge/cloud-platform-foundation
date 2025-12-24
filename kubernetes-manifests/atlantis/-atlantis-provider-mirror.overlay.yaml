@@ -1,0 +1,45 @@
+extraVolumes:
+  - name: tf-provider-mirror
+    persistentVolumeClaim:
+      claimName: tf-provider-mirror-pvc
+  - name: tf-cli-config
+    emptyDir: {}
+
+extraVolumeMounts:
+  - name: tf-provider-mirror
+    mountPath: /tf-mirror
+  - name: tf-cli-config
+    mountPath: /tf-cli-config
+
+extraEnvironmentVars:
+  TF_CLI_CONFIG_FILE: /tf-cli-config/terraformrc
+
+initContainers:
+  - name: init-tf-provider-mirror
+    image: alpine:3.20
+    command: ["sh", "-lc"]
+    args:
+      - |
+        set -eux
+        apk add --no-cache ca-certificates curl unzip
+        mkdir -p /tf-mirror/registry.terraform.io/yandex-cloud/yandex/0.100.0/linux_amd64
+        curl -L -o /tmp/yandex.zip https://github.com/yandex-cloud/terraform-provider-yandex/releases/download/v0.100.0/terraform-provider-yandex_0.100.0_linux_amd64.zip
+        unzip -o /tmp/yandex.zip -d /tmp/yandex
+        install -m 0755 /tmp/yandex/terraform-provider-yandex_v0.100.0 /tf-mirror/registry.terraform.io/yandex-cloud/yandex/0.100.0/linux_amd64/terraform-provider-yandex_v0.100.0
+
+        cat > /tf-cli-config/terraformrc <<'RC'
+        provider_installation {
+          filesystem_mirror {
+            path    = "/tf-mirror"
+            include = ["yandex-cloud/yandex"]
+          }
+          direct {
+            exclude = ["yandex-cloud/yandex"]
+          }
+        }
+        RC
+    volumeMounts:
+      - name: tf-provider-mirror
+        mountPath: /tf-mirror
+      - name: tf-cli-config
+        mountPath: /tf-cli-config

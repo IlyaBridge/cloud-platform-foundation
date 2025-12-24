@@ -1,0 +1,25 @@
+atlantis:
+  image:
+    repository: ghcr.io/runatlantis/atlantis
+    tag: v0.38.0
+
+  ingress:
+    enabled: true
+    hostname: atlantis.diploma.local
+    path: /
+    annotations: {}
+
+  backend:
+    bucket: "diploma-terraform-state-ilya"
+    key: "infrastructure/terraform.tfstate"
+    region: "ru-central1"
+    endpoint: "https://storage.yandexcloud.net"
+    access_key: "REPLACE_ME"
+    secret_key: "REPLACE_ME"
+
+  secrets:
+    service_account_key_file: "/home/atlantis/service_account_key_file.json"
+    terraform_variables:
+      TF_VAR_yandex_cloud_id: "b1gpupamkrr85nd1d31m"
+      TF_VAR_yandex_folder_id: "b1grpedldfrumqsrjf62"
+      TF_VAR_service_account_key_file: "/home/atlantis/service_account_key_file.json"
