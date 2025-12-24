@@ -75,3 +75,4 @@ app/.env*
 app/*.log
 app/build/
 app/dist/
+scripts/atlantis-values.yaml
