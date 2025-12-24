@@ -1,0 +1,57 @@
+version: 3
+
+automerge: false
+parallel_plan: true
+parallel_apply: false
+
+projects:
+  - name: infrastructure
+    dir: terraform/infrastructure
+    workspace: default
+    autoplan:
+      enabled: true
+      when_modified:
+        - "*.tf"
+        - "*.tfvars"
+        - "*.tfvars.json"
+        - "**/*.tf"
+        - "**/*.tfvars"
+        - "**/*.tfvars.json"
+
+  - name: kubernetes
+    dir: terraform/kubernetes
+    workspace: default
+    autoplan:
+      enabled: true
+      when_modified:
+        - "*.tf"
+        - "*.tfvars"
+        - "*.tfvars.json"
+        - "**/*.tf"
+        - "**/*.tfvars"
+        - "**/*.tfvars.json"
+
+  - name: registry
+    dir: terraform/registry
+    workspace: default
+    autoplan:
+      enabled: true
+      when_modified:
+        - "*.tf"
+        - "*.tfvars"
+        - "*.tfvars.json"
+        - "**/*.tf"
+        - "**/*.tfvars"
+        - "**/*.tfvars.json"
+
+workflows:
+  default:
+    plan:
+      steps:
+        - init:
+            extra_args:
+              - "-backend-config=/atlantis-backend/backend.conf"
+        - plan
+    apply:
+      steps:
+        - apply
