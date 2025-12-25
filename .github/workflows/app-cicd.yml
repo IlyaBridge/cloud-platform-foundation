@@ -1,67 +1,109 @@
-name: Build & Deploy App
+name: App CI/CD
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
+    tags:
+      - "v*"
     paths:
       - "app/**"
       - "kubernetes-manifests/application/**"
       - ".github/workflows/app-cicd.yml"
 
 jobs:
-  build-push-deploy:
+  build-and-push:
     runs-on: ubuntu-latest
 
-    env:
-      YC_CLOUD_ID: ${{ secrets.YC_CLOUD_ID }}
-      YC_FOLDER_ID: ${{ secrets.YC_FOLDER_ID }}
-      YC_K8S_CLUSTER_ID: ${{ secrets.YC_K8S_CLUSTER_ID }}
-      REGISTRY_ID: ${{ secrets.YC_REGISTRY_ID }}
+    outputs:
+      image: ${{ steps.meta.outputs.image }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install yc
-        run: |
-          curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
-          echo "$HOME/yandex-cloud/bin" >> $GITHUB_PATH
-
-      - name: Configure yc with SA key
+      - name: Prepare vars
+        id: meta
         shell: bash
         run: |
-          echo '${{ secrets.YC_SA_JSON }}' > sa.json
-          yc config profile create github || true
-          yc config set service-account-key sa.json --profile github
-          yc config set cloud-id "$YC_CLOUD_ID" --profile github
-          yc config set folder-id "$YC_FOLDER_ID" --profile github
+          REGISTRY_ID="${{ secrets.YC_REGISTRY_ID }}"
+          REPO="cr.yandex/${REGISTRY_ID}/cloud-demo-app"
 
-      - name: Login to Yandex Container Registry
-        run: |
-          yc container registry configure-docker --profile github
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            TAG="${GITHUB_REF_NAME}"
+          else
+            TAG="sha-${GITHUB_SHA::7}"
+          fi
 
-      - name: Build and Push image
+          echo "image=${REPO}:${TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Write YC SA key to file
+        shell: bash
         run: |
-          TAG=${{ github.sha }}
-          IMAGE="cr.yandex/${REGISTRY_ID}/cloud-demo-app:${TAG}"
-          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+          echo '${{ secrets.YC_SA_KEY_JSON }}' > yc-key.json
+          chmod 600 yc-key.json
+
+      - name: Install yc CLI
+        shell: bash
+        run: |
+          curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash -s -- -i /usr/local -n
+          yc --version
+
+      - name: Authenticate to Yandex Cloud
+        shell: bash
+        run: |
+          yc config profile create github-actions || true
+          yc config set service-account-key yc-key.json
+          yc config set cloud-id b1gpupamkrr85nd1d31m
+          yc config set folder-id b1grpedldfrumqsrjf62
+
+      - name: Configure Docker auth for cr.yandex
+        shell: bash
+        run: |
+          yc container registry configure-docker
+          cat ~/.docker/config.json | head -n 30
+
+      - name: Build and push image
+        shell: bash
+        run: |
+          IMAGE="${{ steps.meta.outputs.image }}"
+          echo "Building $IMAGE"
           docker build -t "$IMAGE" ./app
           docker push "$IMAGE"
 
-      - name: Get kubeconfig
-        run: |
-          yc managed-kubernetes cluster get-credentials "$YC_K8S_CLUSTER_ID" \
-            --external \
-            --force \
-            --profile github
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-push
 
-      - name: Deploy to Kubernetes
-        run: |
-          # применяем манифесты (Service/Ingress/Deployment)
-          kubectl apply -f kubernetes-manifests/application/
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-          # обновляем только image в deployment
+      - name: Install kubectl
+        shell: bash
+        run: |
+          curl -sSL -o kubectl "https://storage.googleapis.com/kubernetes-release/release/$(curl -sSL https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/kubectl
+          kubectl version --client=true
+
+      - name: Setup kubeconfig
+        shell: bash
+        run: |
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > kubeconfig
+          chmod 600 kubeconfig
+          echo "KUBECONFIG=$PWD/kubeconfig" >> $GITHUB_ENV
+
+      - name: Verify cluster access
+        shell: bash
+        run: |
+          kubectl get nodes
+
+      - name: Deploy new image (rolling update)
+        shell: bash
+        run: |
+          IMAGE="${{ needs.build-and-push.outputs.image }}"
+          echo "Deploying image: $IMAGE"
+
+          # IMPORTANT: verify names in your cluster (deployment + container)
           kubectl -n default set image deployment/cloud-demo-app cloud-demo-app="$IMAGE"
-
-          # ждём rollout
-          kubectl -n default rollout status deployment/cloud-demo-app --timeout=180s
+          kubectl -n default rollout status deployment/cloud-demo-app
