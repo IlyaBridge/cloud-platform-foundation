@@ -47,10 +47,15 @@ node_modules/
 __pycache__/
 
 # ======================
-# Спец файлы для проекта
+# Спец файлы для проекта (secrets / local runtime files)
+kubeconfig-actions.yaml
+kubeconfig-actions.b64
+app/atlantis-values.yaml
+scripts/atlantis-values.yaml
+github-actions-key.json
 
 # Скрипты ( пока в работе!!! )
-scripts/deploy-*.sh
+scripts/deploy*.sh
 scripts/destroy*.sh
 scripts/quick-access.sh
 scripts/setup-k8s-access.sh
@@ -75,4 +80,6 @@ app/.env*
 app/*.log
 app/build/
 app/dist/
-scripts/atlantis-values.yaml
+
+
+
