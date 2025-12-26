@@ -116,8 +116,17 @@ jobs:
         shell: bash
         run: |
           IMAGE="${{ needs.build-and-push.outputs.image }}"
-          echo "Deploying image: $IMAGE"
+          echo "Deploying image: [$IMAGE]"
 
-          # IMPORTANT: verify names in your cluster (deployment + container)
-          kubectl -n default set image deployment/cloud-demo-app cloud-demo-app="$IMAGE"
+          if [[ -z "$IMAGE" ]]; then
+            echo "ERROR: IMAGE is empty. Check build-and-push outputs and secrets (YC_REGISTRY_ID)."
+            exit 1
+          fi
+
+          # Узнаём имя контейнера прямо из кластера автоматически:
+          CONTAINER_NAME="$(kubectl -n default get deploy cloud-demo-app -o jsonpath='{.spec.template.spec.containers[0].name}')"
+          echo "Detected container name: [$CONTAINER_NAME]"
+
+          kubectl -n default set image deployment/cloud-demo-app "${CONTAINER_NAME}=$IMAGE"
           kubectl -n default rollout status deployment/cloud-demo-app
+
