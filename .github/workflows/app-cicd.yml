@@ -26,6 +26,13 @@ jobs:
         shell: bash
         run: |
           REGISTRY_ID="${{ secrets.YC_REGISTRY_ID }}"
+
+          echo "DEBUG: YC_REGISTRY_ID length = ${#REGISTRY_ID}"
+          if [[ -z "$REGISTRY_ID" ]]; then
+            echo "ERROR: secrets.YC_REGISTRY_ID is empty or missing"
+            exit 1
+          fi
+
           REPO="cr.yandex/${REGISTRY_ID}/cloud-demo-app"
 
           if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
@@ -34,7 +41,10 @@ jobs:
             TAG="sha-${GITHUB_SHA::7}"
           fi
 
-          echo "image=${REPO}:${TAG}" >> "$GITHUB_OUTPUT"
+          IMAGE="${REPO}:${TAG}"
+          echo "DEBUG: IMAGE=$IMAGE"
+          echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
+
 
       - name: Write YC SA key to file
         shell: bash
