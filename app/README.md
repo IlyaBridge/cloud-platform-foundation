@@ -13,3 +13,4 @@ docker run -p 8080:80 diploma-app:1.0.0
 
 ###  Доступ
 Приложение доступно по [http://localhost:8080](http://localhost:8080)
+123
