@@ -125,18 +125,30 @@ jobs:
       - name: Deploy new image (rolling update)
         shell: bash
         run: |
-          IMAGE="${{ needs.build-and-push.outputs.image }}"
-          echo "Deploying image: [$IMAGE]"
-
-          if [[ -z "$IMAGE" ]]; then
-            echo "ERROR: IMAGE is empty. Check build-and-push outputs and secrets (YC_REGISTRY_ID)."
+          # 1) Собираем IMAGE заново (НЕ через needs.outputs)
+          REGISTRY_ID="${{ secrets.YC_REGISTRY_ID }}"
+          if [[ -z "$REGISTRY_ID" ]]; then
+            echo "ERROR: secrets.YC_REGISTRY_ID is empty or missing"
             exit 1
           fi
 
-          # Узнаём имя контейнера прямо из кластера автоматически:
+          REPO="cr.yandex/${REGISTRY_ID}/cloud-demo-app"
+
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            TAG="${GITHUB_REF_NAME}"
+          else
+            TAG="sha-${GITHUB_SHA::7}"
+          fi
+
+          IMAGE="${REPO}:${TAG}"
+          echo "Deploying image: [$IMAGE]"
+
+          # 2) Узнаём имя контейнера автоматически (чтобы не гадать)
           CONTAINER_NAME="$(kubectl -n default get deploy cloud-demo-app -o jsonpath='{.spec.template.spec.containers[0].name}')"
           echo "Detected container name: [$CONTAINER_NAME]"
 
-          kubectl -n default set image deployment/cloud-demo-app "${CONTAINER_NAME}=$IMAGE"
+          # 3) Обновляем деплой
+          kubectl -n default set image deployment/cloud-demo-app "${CONTAINER_NAME}=${IMAGE}"
           kubectl -n default rollout status deployment/cloud-demo-app
+
 
