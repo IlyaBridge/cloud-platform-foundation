@@ -46,8 +46,15 @@ jobs:
         shell: bash
         run: |
           curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash -s -- -n
+
+          # 1) Для следующих шагов:
           echo "$HOME/yandex-cloud/bin" >> $GITHUB_PATH
+
+          # 2) Для текущего шага:
+          export PATH="$HOME/yandex-cloud/bin:$PATH"
+
           yc --version
+
 
       # - name: Install yc CLI
       #   shell: bash
