@@ -119,6 +119,8 @@ cloud-platform-foundation/
 
 ## Этап 1. Создание облачной инфраструктуры
 
+---
+
 ### Описание
 Инфраструктура в Yandex Cloud создаётся полностью с помощью Terraform.
 Используется Object Storage в качестве backend для хранения state.
@@ -133,14 +135,14 @@ cloud-platform-foundation/
 
 1. Yandex Cloud Console -> созданные ресурсы
 
-        [Скриншот]
+![Скриншот](images/LVL-1-0001.jpg)
 
 В Yandex Cloud Console отображаются созданные ресурсы, Managed Kubernetes, VPC, Object Storage, Container Registry.
 Данные компоненты инфраструктуры были созданы автоматически средствами Terraform.
 
 2. Object Storage bucket (backend)
 
-        [Скриншот]
+![Скриншот](images/LVL-1-0002.jpg)
 
 Для хранения Terraform state используется Object Storage в Yandex Cloud.
 State-файлы разделены по компонентам инфраструктуры (infrastructure, kubernetes, registry).
@@ -153,6 +155,8 @@ State-файлы разделены по компонентам инфрастр
 ---
 
 ## Этап 2. Создание Kubernetes кластера
+
+---
 
 ### Описание
 Использован Yandex Managed Service for Kubernetes:
@@ -172,23 +176,25 @@ kubectl get pods --all-namespaces
 
 1. `kubectl get nodes`
 
-        [Скриншот]
+![Скриншот](images/LVL-2-0001.jpg)
 
 2. `kubectl config current-context`
 
-        [Скриншот]
+![Скриншот](images/LVL-2-0002.jpg)
 
 3. `kubectl get pods --all-namespaces`
 
-        [Скриншот]
+![Скриншот](images/LVL-2-0003.jpg)
 
 4. `kubectl cluster-info`
 
-        [Скриншот]
+![Скриншот](images/LVL-2-0004.jpg)
 
 ---
 
 ## Этап 3. Создание тестового приложения
+
+---
 
 ### Описание
 Создано простое тестовое приложение:
@@ -210,7 +216,7 @@ kubectl get deploy -n default
 kubectl get pods -n default -o wide
 ```
 
-        [Скриншот] LVL-3-0001
+![Скриншот](images/LVL-3-0001.jpg)
 
 Тестовое приложение успешно развернуто в Kubernetes в виде Deployment.
 Pod’ы находятся в состоянии Running.
@@ -221,29 +227,29 @@ kubectl get svc -n default
 kubectl describe ingress cloud-demo-app -n default
 ```
 
-        [Скриншот] LVL-3-0002
+![Скриншот](images/LVL-3-0002.jpg)
 
 Для тестового приложения настроены Kubernetes Service и Ingress.
 Ingress обеспечивает внешний HTTP-доступ к приложению по 80 порту.
 
 3. Приложение 
+`http://app.diploma.local/`
 
-http://app.diploma.local/
-
-        [Скриншот] LVL-3-0003
+![Скриншот](images/LVL-3-0003.jpg)
 
 Тестовое приложение доступно по HTTP через Ingress-контроллер.
 Приложение корректно отвечает на запросы и отдаёт статическую HTML-страницу.
 
-================================================================================================
-        [Скриншот] — Обновление через CI/CD
-        Статус: Приложение успешно запущено в Kubernetes
-                        Версия: 1.0.1
-================================================================================================
+![Скриншот](images/LVL-3-0004.jpg)
+
+Данный скриншот демонстрирует обновление тестового приложения через CI/CD, уже после (см. далее).
 
 ---
 
 ## Этап 4. Мониторинг и деплой приложения
+
+---
+
 На данном этапе в Kubernetes-кластер была развернута система мониторинга и тестовое приложение.
 
 ### Мониторинг
@@ -266,7 +272,7 @@ http://app.diploma.local/
 kubectl get pods -n monitoring
 ```
 
-        [Скриншот] LVL-4-0001
+![Скриншот](images/LVL-4-0001.jpg)
 
 В namespace monitoring успешно запущены pod’ы Prometheus, Grafana, Alertmanager и node-exporter.
 
@@ -275,7 +281,7 @@ kubectl get pods -n monitoring
 kubectl get svc -n monitoring
 ```
 
-        [Скриншот] LVL-4-0002
+![Скриншот](images/LVL-4-0002.jpg)
 
 Сервисы Prometheus, Grafana и Alertmanager созданы и доступны внутри кластера.
 
@@ -284,7 +290,7 @@ kubectl get svc -n monitoring
 kubectl get ingress -n monitoring
 ```
 
-        [Скриншот] LVL-4-0003
+![Скриншот](images/LVL-4-0003.jpg)
 
 Настроен Ingress для доступа к Grafana и Prometheus по HTTP.
 
@@ -293,28 +299,28 @@ kubectl get ingress -n monitoring
 kubectl describe ingress grafana -n monitoring
 ```
 
-        [Скриншот] LVL-4-0004
+![Скриншот](images/LVL-4-0004.jpg)
 
 Grafana доступна извне через Ingress и слушает HTTP-порт 80.
 
 5. Grafana UI
 http://grafana.diploma.local/login
 
-        [Скриншот] LVL-4-0005
+![Скриншот](images/LVL-4-0005.jpg)
 
 Веб-интерфейс Grafana, выбор метрик.
 
 ---
 
-        [Скриншот] LVL-4-0006
+![Скриншот](images/LVL-4-0006.jpg)
 
 Kubernetes / Compute Resources / Node (Pods) — метрики по состоянию pod'ов на уровне нод.
 
-        [Скриншот] LVL-4-0007
+![Скриншот](images/LVL-4-0007.jpg)
 
 Kubernetes / Compute Resources / Namespace (Pods) — метрики по pod'ам в определённых неймспейсах.
 
-        [Скриншот] LVL-4-0008
+![Скриншот](images/LVL-4-0008.jpg)
 
 Kubernetes / Compute Resources / Workload — метрики по рабочим нагрузкам в кластере.
 
@@ -322,15 +328,18 @@ Kubernetes / Compute Resources / Workload — метрики по рабочим
 
 6. `kubectl get svc -A`
 
-        [Скриншот] LVL-4-0009
+![Скриншот](images/LVL-4-0009.jpg)
 
 7. `kubectl get ingress -A`
 
-        [Скриншот] LVL-4-0010
+![Скриншот](images/LVL-4-0010.jpg)
 
 ---
 
 ## Этап 5. Terraform pipeline (Atlantis)
+
+---
+
 Atlantis - инструмент для автоматического запуска Terraform планов и применения изменений на основе Pull Request'ов (PR). 
 Здесь Atlantis автоматически выполняет команду terraform plan и, после одобрения, применяет изменения с помощью команды atlantis apply.
 Т.е. в Kubernetes установлен **Atlantis**, который:
@@ -338,23 +347,22 @@ Atlantis - инструмент для автоматического запус
 - выполняет `terraform plan`;
 - применяет изменения после `atlantis apply`.
 
-### Скриншоты:
-1. Pull Request с комментарием Atlantis (plan)
+### Скриншоты результатов:
+Pull Request с комментарием Atlantis (plan)
+Pull Request с `Apply complete`
+UI Atlantis (jobs)
 
-        [Скриншот]
+![Скриншот](images/LVL-5-0001.jpg)
 
-2. Pull Request с `Apply complete`
+![Скриншот](images/LVL-5-0002.jpg)
 
-        [Скриншот]
-        
-3. UI Atlantis (jobs)
-
-        [Скриншот]
-        
+![Скриншот](images/LVL-5-0003.jpg)
 
 ---
 
 ## Этап 6. CI/CD для приложения (GitHub Actions)
+
+---
 
 ### Описание
 
@@ -374,20 +382,27 @@ Atlantis - инструмент для автоматического запус
 ### Скриншоты:
 1. GitHub -> Actions -> Run
 
-        [Скриншот]
+![Скриншот](images/LVL-6-0001.jpg)
 
-2. Build & Push image (успех)
+Вывод из вкладки GitHub -> Actions -> Run (для визуализации начала выполнения и состояния процесса).
 
-        [Скриншот]
+2. Build & Push image
+
+![Скриншот](images/LVL-6-0002.jpg)
+
+Образ был успешно построен и отправлен в реестр.
 
 3. Deploy step (successfully rolled out)
 
-        [Скриншот]
+![Скриншот](images/LVL-6-0003.jpg)
+
+Успешный деплой в Kubernetes (с сообщением "successfully rolled out").
 
 4. `kubectl get deploy cloud-demo-app`
 
-        [Скриншот]
+![Скриншот](images/LVL-6-0004.jpg)
 
+Команда `kubectl get deploy cloud-demo-app` подтверждает успешный деплой и актуальную версию приложения в кластере.
 
 ---
 
@@ -404,7 +419,28 @@ Atlantis - инструмент для автоматического запус
 
 ---
 
+## Запуск 
+1. Файл развёртывания инфраструктуры - deploy.sh
+Команда на выполнение:
+```bash
+cd /home/ilya/cloud-platform-foundation/scripts
+./deploy.sh
+```
+
+2. Настройка Webhooks, раздел IP на GitHub в Settings -> Webhooks -> Settings -> Payload URL * Пример: `http://158.160.217.161/events`
+
+3. Файл конфигурации Atlantis - configure-atlantis-runtime.sh
+Команда на выполнение:
+```bash
+cd /home/ilya/cloud-platform-foundation/scripts
+./configure-atlantis-runtime.sh
+```
+
+4. Настройка CI/CD
+
 ## Ссылки
+- Файл [deploy.sh](https://github.com/IlyaBridge/cloud-platform-foundation/blob/main/scripts/deploy.sh)
+- Файл [configure-atlantis-runtime.sh](https://github.com/IlyaBridge/cloud-platform-foundation/blob/main/scripts/configure-atlantis-runtime.sh)
 - Репозиторий: `https://github.com/IlyaBridge/cloud-platform-foundation`
 - Тестовое приложение: `http://`
 - Grafana: `http://`

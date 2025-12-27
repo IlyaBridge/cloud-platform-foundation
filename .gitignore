@@ -55,7 +55,7 @@ scripts/atlantis-values.yaml
 github-actions-key.json
 
 # Скрипты ( пока в работе!!! )
-scripts/deploy*.sh
+scripts/deploy-*.sh
 scripts/destroy*.sh
 scripts/quick-access.sh
 scripts/setup-k8s-access.sh
