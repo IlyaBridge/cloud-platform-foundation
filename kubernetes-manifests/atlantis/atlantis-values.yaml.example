@@ -10,8 +10,6 @@ repoConfig: |
   repos:
     - id: /.*/
       workflow: terraform
-      allowed_overrides: [workflow]
-      apply_requirements: [approved]
 
   workflows:
     terraform:
@@ -19,7 +17,7 @@ repoConfig: |
         steps:
           - init:
               extra_args:
-                - "-backend-config=backend.conf"
+                - "-backend-config=/atlantis-backend/backend.conf"
           - plan
       apply:
         steps:
@@ -27,3 +25,17 @@ repoConfig: |
 
 service:
   type: LoadBalancer
+
+# service:
+#   type: ClusterIP
+
+extraVolumes:
+  - name: backend-conf
+    secret:
+      secretName: atlantis-backend-conf
+
+extraVolumeMounts:
+  - name: backend-conf
+    mountPath: /atlantis-backend
+    readOnly: true
+

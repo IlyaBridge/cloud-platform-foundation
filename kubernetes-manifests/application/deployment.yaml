@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: nginx
-          image: cr.yandex/crpre42rnn3bk2nd18qd/cloud-demo-app:1.0.0
+          image: cr.yandex/crp15732tb4diuob8gcm/cloud-demo-app:1.0.0
           ports:
             - containerPort: 80
           resources:

@@ -1,3 +1,4 @@
+# cloud-platform-foundation/kubernetes-manifests/atlantis/values.yaml
 atlantis:
   image:
     repository: ghcr.io/runatlantis/atlantis
