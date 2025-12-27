@@ -18,3 +18,9 @@ output "k8s_security_group_id" {
 output "zones" {
   value = var.zones
 }
+
+# ============= Test ==================
+output "atlantis_proof" {
+  value = "ok"
+}
+
