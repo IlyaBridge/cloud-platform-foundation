@@ -44,14 +44,14 @@ projects:
         - "**/*.tfvars"
         - "**/*.tfvars.json"
 
-workflows:
-  default:
-    plan:
-      steps:
-        - init:
-            extra_args:
-              - "-backend-config=/atlantis-backend/backend.conf"
-        - plan
-    apply:
-      steps:
-        - apply
+# workflows:
+#   default:
+#     plan:
+#       steps:
+#         - init:
+#             extra_args:
+#               - "-backend-config=/atlantis-backend/backend.conf"
+#         - plan
+#     apply:
+#       steps:
+#         - apply
